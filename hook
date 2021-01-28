@@ -1,0 +1,22 @@
+#!/bin/sh
+
+function exit_on_bad_retval {
+  container=$1
+  docker-compose run --rm "$container" echo "hi i am $container"
+
+  retval=$?
+
+  if [ $retval -gt 0 ]
+  then
+    echo "Got an error from $container"
+    exit $retval
+  fi
+}
+
+. `which env_parallel.bash`
+
+docker pull alpine
+docker pull busybox
+
+env_parallel --jobs 6 exit_on_bad_retval ::: "alpine" "busybox"
+exit $?
